@@ -51,4 +51,70 @@ document.addEventListener('DOMContentLoaded', () => {
         // Start typing effect slightly after page load
         setTimeout(typeWriter, 1000);
     }
+
+    // Popup Modal Logic
+    const openPopupBtn = document.getElementById('openPopupBtn');
+    const closePopupBtn = document.getElementById('closePopupBtn');
+    const questionsModal = document.getElementById('questionsModal');
+
+    if (openPopupBtn && closePopupBtn && questionsModal) {
+        openPopupBtn.addEventListener('click', () => {
+            questionsModal.classList.add('active');
+            // Slight delay to ensure display: flex is applied before opacity transition
+            setTimeout(() => {
+                questionsModal.style.opacity = '1';
+                questionsModal.querySelector('.modal-content').style.transform = 'translateY(0)';
+            }, 10);
+        });
+        
+        closePopupBtn.addEventListener('click', () => {
+            questionsModal.classList.remove('active');
+        });
+
+        // Close on outside click
+        questionsModal.addEventListener('click', (e) => {
+            if (e.target === questionsModal) {
+                questionsModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Form Submit Logic (Native Iframe)
+    window.isSubmitting = false;
+    window.handleFormLoad = function() {
+        if (window.isSubmitting) {
+            alert('Thank you! Your answers have been successfully submitted.');
+            const reflectionForm = document.getElementById('reflectionForm');
+            if (reflectionForm) reflectionForm.reset();
+            const questionsModal = document.getElementById('questionsModal');
+            if (questionsModal) questionsModal.classList.remove('active');
+            
+            const saveReflectionBtn = document.getElementById('saveReflectionBtn');
+            if (saveReflectionBtn) saveReflectionBtn.innerText = "Submit Answers";
+            
+            window.isSubmitting = false;
+        }
+    };
+
+    const reflectionForm = document.getElementById('reflectionForm');
+    
+    if (reflectionForm) {
+        reflectionForm.addEventListener('submit', () => {
+            // Fill empty fields with "N/A" to prevent Google Forms from rejecting the submission
+            // in case any of the fields are marked as "Required" in the form settings.
+            const textareas = reflectionForm.querySelectorAll('textarea');
+            textareas.forEach(ta => {
+                if (!ta.value.trim()) {
+                    ta.value = "N/A";
+                }
+            });
+
+            // Do NOT prevent default here. Let the browser submit it natively.
+            window.isSubmitting = true;
+            const saveReflectionBtn = document.getElementById('saveReflectionBtn');
+            if (saveReflectionBtn) {
+                saveReflectionBtn.innerText = "Submitting...";
+            }
+        });
+    }
 });
